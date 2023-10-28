@@ -1,5 +1,6 @@
 """Operator Price Manager Model."""
 
+from pickle import dump, load
 from pprint import pformat
 
 from utils import SortedList
@@ -12,6 +13,14 @@ from .prefix_price_entry import PrefixPriceEntry
 class OperatorPriceManager:
     """Operator Price Manager Model."""
 
+    _instance = None  # Class variable to hold the single instance
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(OperatorPriceManager, cls).__new__(cls)
+            cls._instance.__initialized = False
+        return cls._instance
+
     def __init__(self):
         if not self.__initialized:
             self.pricing_info: dict[str, SortedList] = {}
@@ -22,6 +31,16 @@ class OperatorPriceManager:
     def reset_singleton(cls):
         """Reset the Singleton instance to None."""
         cls._instance = None
+
+    def store_state(self, filepath: str):
+        with open(filepath, mode="wb") as file:
+            dump(self, file)
+
+    def load_state(self, filepath: str):
+        with open(filepath, mode="rb") as file:
+            loaded_state = load(file)
+            self.pricing_info = loaded_state.pricing_info
+            self.longest_prefix = loaded_state.longest_prefix
 
     def update_pricing_info(
         self,

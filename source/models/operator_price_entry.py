@@ -13,6 +13,9 @@ class OperatorPriceEntry(tuple):
         self.price = price
         self.operator_name = operator_name
 
+    def __reduce__(self):
+        return (self.__class__, (self.price, self.operator_name))
+
     def __repr__(self) -> str:
         return (
             "OperatorPriceEntry"
